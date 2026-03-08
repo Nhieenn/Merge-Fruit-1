@@ -15,6 +15,7 @@ public class Fruit : MonoBehaviour
         if (otherFruit != null && otherFruit.fruitLevel == this.fruitLevel && !otherFruit.hasMerged)
         {
             this.hasMerged = true;
+            ScoreManager.instance.AddScore(fruitLevel * 10);
             otherFruit.hasMerged = true;
 
             if (nextLevelPrefab != null)

@@ -1,0 +1,19 @@
+﻿.casual-score {
+    /* Kích thước và căn chỉnh */
+    font-size: 80px;
+    -unity-font-style: bold;
+    -unity-text-align: upper-center;
+    
+    /* Màu chữ chính: Trắng */
+    color: rgb(255, 255, 255);
+    
+    /* Viền chữ (Outline) giúp chữ nổi bật trên mọi nền 3D */
+    -unity-text-outline-width: 4px;
+    -unity-text-outline-color: rgb(50, 50, 50);
+    
+    /* Đổ bóng (Shadow) tạo cảm giác 3D béo ngậy */
+    text-shadow: 5px 5px 0 rgba(0, 0, 0, 0.4);
+    
+    /* Khoảng cách lề trên để chữ không sát mép màn hình */
+    margin-top: 50px;
+}
