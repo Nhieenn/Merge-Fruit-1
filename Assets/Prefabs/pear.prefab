@@ -182,4 +182,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Fruit
   fruitLevel: 8
-  nextLevelPrefab: {fileID: 4979653295554397375, guid: 67d0f1dca0181134db17836c8bd2db81, type: 3}
+  nextLevelPrefab: {fileID: 4160440129536726372, guid: 533dd399b3b4bf948add5230d49cf5dc, type: 3}
