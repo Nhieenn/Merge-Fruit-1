@@ -141,7 +141,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 56
   m_CollisionDetection: 0
 --- !u!114 &3736123444000723244
 MonoBehaviour:
@@ -157,3 +157,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Fruit
   fruitLevel: 5
   nextLevelPrefab: {fileID: 4710537785510594082, guid: 6a753d8bd2ce8fc44b8508cba5185ba6, type: 3}
+  mergeEffectPrefab: {fileID: 4165127031635467946, guid: b1e1f825cbe178541b4c0d5a1ce3fb21, type: 3}

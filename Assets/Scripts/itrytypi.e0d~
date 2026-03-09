@@ -1,0 +1,86 @@
+﻿using UnityEngine;
+using System.Collections;
+
+public class FruitSpawner : MonoBehaviour
+{
+    [Header("Settings")]
+    public GameObject[] allFruitPrefabs; // Đưa toàn bộ 11 quả vào đây theo thứ tự từ cấp 1 đến 11
+    public float spawnLimitX = 2.5f;
+    public float spawnDelay = 1f; // Thời gian chờ để sinh quả tiếp theo sau khi thả
+
+    private GameObject currentPreviewFruit;
+    private bool canDrop = true;
+
+    void Start()
+    {
+        SpawnPreviewFruit();
+    }
+
+    void Update()
+    {
+        if (currentPreviewFruit != null && canDrop)
+        {
+            TrackMousePosition();
+
+            // Nhấn chuột trái hoặc chạm màn hình để thả
+            if (Input.GetMouseButtonDown(0))
+            {
+                StartCoroutine(DropFruitRoutine());
+            }
+        }
+    }
+
+    void TrackMousePosition()
+    {
+        // Bắn tia từ Camera tới vị trí chuột để lấy tọa độ X trong không gian 3D
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Plane gamePlane = new Plane(Vector3.back, Vector3.zero); // Mặt phẳng Z = 0
+
+        if (gamePlane.Raycast(ray, out float distance))
+        {
+            Vector3 hitPoint = ray.GetPoint(distance);
+            float clampedX = Mathf.Clamp(hitPoint.x, -spawnLimitX, spawnLimitX);
+
+            // Di chuyển quả lơ lửng theo trục X, giữ nguyên Y của Spawner
+            currentPreviewFruit.transform.position = new Vector3(clampedX, transform.position.y, transform.position.z);
+        }
+    }
+
+    void SpawnPreviewFruit()
+    {
+        // Giới hạn mảng random dựa trên level đã mở khóa và giới hạn tối đa cho phép rớt
+        int maxAllowedLevel = Mathf.Min(GameManager.instance.highestUnlockedLevel, GameManager.instance.maxSpawnableLevelLimit);
+
+        // Random từ mảng (index 0 là level 1)
+        int randomIndex = Random.Range(0, maxAllowedLevel);
+
+        currentPreviewFruit = Instantiate(allFruitPrefabs[randomIndex], transform.position, Quaternion.identity);
+
+        // Vô hiệu hóa vật lý và va chạm trong lúc lơ lửng
+        Rigidbody rb = currentPreviewFruit.GetComponent<Rigidbody>();
+        Collider col = currentPreviewFruit.GetComponent<Collider>();
+
+        if (rb != null) rb.isKinematic = true; // Tắt trọng lực
+        if (col != null) col.enabled = false;  // Tránh va chạm sớm
+    }
+
+    IEnumerator DropFruitRoutine()
+    {
+        canDrop = false;
+
+        // Bật lại vật lý cho quả rơi xuống
+        Rigidbody rb = currentPreviewFruit.GetComponent<Rigidbody>();
+        Collider col = currentPreviewFruit.GetComponent<Collider>();
+
+        if (rb != null) rb.isKinematic = false;
+        if (col != null) col.enabled = true;
+
+        currentPreviewFruit = null;
+
+        // Đợi một khoảng thời gian trước khi sinh quả mới
+        yield return new WaitForSeconds(spawnDelay);
+
+        SpawnPreviewFruit();
+        canDrop = true;
+    }
+}
