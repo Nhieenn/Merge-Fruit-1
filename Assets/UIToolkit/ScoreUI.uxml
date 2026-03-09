@@ -1,7 +1,7 @@
 ﻿<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <Style src="ScoreStyle.uss" />
     
-    <ui:VisualElement class="hud-fullscreen">
+    <ui:VisualElement name="hud-main" class="hud-fullscreen">
         
         <ui:VisualElement class="glass-panel top-left-panel">
             <ui:Label text="BEST: 2500" name="high-score-label" class="minimal-text" />
@@ -17,10 +17,40 @@
                 <ui:VisualElement name="next-fruit-icon" class="next-fruit-placeholder" />
             </ui:VisualElement>
             
-            <ui:VisualElement class="glass-panel settings-btn">
-                <ui:Label text="⚙" class="icon-text" />
-            </ui:VisualElement>
+            <ui:Button name="settings-btn" class="glass-panel settings-btn">
+        <ui:Label text="⚙" class="icon-text" />
+    </ui:Button>
         </ui:VisualElement>
 
     </ui:VisualElement>
+
+    <ui:VisualElement name="game-over-screen" class="game-over-overlay hidden">
+        <ui:VisualElement class="glass-panel game-over-box">
+            <ui:Label text="GAME OVER" class="game-over-title" />
+            <ui:Label text="SCORE: 0" name="final-score-label" class="minimal-text game-over-score" />
+            <ui:Label text="BEST: 0" name="final-high-score-label" class="minimal-text game-over-highscore" />
+            
+            <ui:Button text="TRY AGAIN" name="restart-btn" class="action-btn" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <ui:VisualElement name="settings-screen" class="game-over-overlay hidden">
+        <ui:VisualElement class="glass-panel game-over-box">
+            <ui:Label text="PAUSED" class="game-over-title" style="color: white;" />
+            <ui:Button text="RESUME" name="resume-btn" class="action-btn" style="margin-bottom: 15px;" />
+            <ui:Button text="RESTART" name="settings-restart-btn" class="action-btn" style="margin-bottom: 15px;" />
+            <ui:Button text="SOUND: ON" name="sound-btn" class="action-btn" style="margin-bottom: 15px;" />
+            <ui:Button text="QUIT" name="quit-btn" class="action-btn" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <ui:VisualElement name="main-menu-screen" class="game-over-overlay">
+        <ui:Label text="MERGE FRUIT 3D" class="game-over-title" style="font-size: 80px; color: white; -unity-text-outline-color: rgba(255,255,255,0.3); margin-bottom: 20px;" />
+        
+        <ui:Label text="BEST: 0" name="main-menu-highscore" class="minimal-text" style="font-size: 30px; margin-bottom: 50px; color: rgb(255, 215, 0);" />
+        
+        <ui:Button text="PLAY" name="start-game-btn" class="action-btn" style="font-size: 40px; padding: 20px 80px; margin-bottom: 20px;" />
+        <ui:Button text="QUIT" name="main-quit-btn" class="action-btn" />
+    </ui:VisualElement>
+
 </ui:UXML>

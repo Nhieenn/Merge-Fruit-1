@@ -4,7 +4,7 @@ using UnityEngine.UIElements;
 public class ScoreManager : MonoBehaviour
 {
     public static ScoreManager instance;
-    private int currentScore = 0;
+    public int currentScore;
     private Label scoreLabel;
 
     void Awake()
