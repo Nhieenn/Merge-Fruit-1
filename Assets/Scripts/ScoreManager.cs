@@ -25,5 +25,9 @@ public class ScoreManager : MonoBehaviour
         {
             scoreLabel.text = "Score: " + currentScore;
         }
+        if (UIManager.instance != null)
+        {
+            UIManager.instance.UpdateScore(currentScore);
+        }
     }
 }

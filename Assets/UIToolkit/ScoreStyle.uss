@@ -17,3 +17,96 @@
     /* Khoảng cách lề trên để chữ không sát mép màn hình */
     margin-top: 50px;
 }
+/* --- PHẦN 1: BỐ CỤC CHÍNH CỦA THANH HUD (DÀN HÀNG NGANG) --- */
+
+/* Khung HUD tổng (Floats Top Center) */
+/* Phủ toàn màn hình để căn các góc */
+.hud-fullscreen {
+    flex-grow: 1;
+    width: 100%;
+    height: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 40px; /* Cách lề màn hình */
+    position: absolute;
+}
+
+/* --- HIỆU ỨNG KÍNH MỜ (GLASSMORPHISM) CHO GAME 3D --- */
+.glass-panel {
+    background-color: rgba(0, 0, 0, 0.35); /* Đen trong suốt, nhìn xuyên thấu cảnh 3D */
+    border-width: 1.5px;
+    border-color: rgba(255, 255, 255, 0.4); /* Viền trắng mỏng, phản quang nhẹ */
+    border-radius: 20px; /* Bo góc nhẹ nhàng thanh lịch */
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- VỊ TRÍ CÁC KHU VỰC --- */
+
+.top-left-panel {
+    height: 50px;
+    padding-left: 20px;
+    padding-right: 20px;
+    align-self: flex-start; /* Neo sát lên trên */
+}
+
+.top-center-panel {
+    align-self: flex-start;
+    margin-top: -20px; /* Đẩy điểm số lên cao một chút */
+}
+
+.top-right-group {
+    flex-direction: row; /* Xếp Next và Settings ngang nhau */
+    align-self: flex-start;
+}
+
+.next-fruit-panel {
+    margin-right: 15px;
+    width: 90px;
+    height: 110px;
+}
+
+.settings-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 25px; /* Nút tròn hoàn hảo */
+}
+
+/* --- ĐỊNH DẠNG CHỮ TEXT & ICONS --- */
+
+.minimal-text {
+    color: rgb(255, 255, 255);
+    font-size: 24px;
+    -unity-font-style: bold;
+    text-shadow: 2px 2px 0px rgba(0,0,0,0.5); /* Bóng mờ để dễ đọc trên mọi nền 3D */
+}
+
+.minimal-text-small {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 16px;
+    -unity-font-style: bold;
+    margin-bottom: 10px;
+}
+
+/* Điểm số chính: To, rõ, nổi bật giữa màn hình */
+.current-score-3d {
+    font-size: 110px;
+    color: rgb(255, 255, 255);
+    -unity-text-outline-width: 2px;
+    -unity-text-outline-color: rgba(0,0,0,0.3);
+    text-shadow: 0px 10px 15px rgba(0, 0, 0, 0.6); /* Đổ bóng xa để chữ như đang lơ lửng trong không gian 3D */
+}
+
+/* Placeholder cho hình trái cây 3D */
+.next-fruit-placeholder {
+    width: 60px;
+    height: 60px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 30px;
+}
+
+/* Icon bánh răng tạm thời */
+.icon-text {
+    color: rgb(255, 255, 255);
+    font-size: 28px;
+}

@@ -9,15 +9,22 @@ public class FruitSpawner : MonoBehaviour
     public float spawnDelay = 1f;
 
     [Header("Trajectory Line")]
-    public LineRenderer trajectoryLine; // Kéo Line Renderer vào đây
+    public LineRenderer trajectoryLine;
 
     private GameObject currentPreviewFruit;
     private bool canDrop = true;
 
+    // Biến này sẽ lưu trữ quả đang hiển thị trên ô NEXT của UI
+    private GameObject nextFruitPrefab;
+
     void Start()
     {
-        // Khởi tạo số điểm của đường kẻ là 2 (Điểm đầu và Điểm cuối)
         if (trajectoryLine != null) trajectoryLine.positionCount = 2;
+
+        // 1. Vừa vào game, random ngay quả đầu tiên để hiện lên UI
+        PrepareNextFruit();
+
+        // 2. Lấy luôn quả vừa random đó đặt lên tay người chơi
         SpawnPreviewFruit();
     }
 
@@ -26,7 +33,7 @@ public class FruitSpawner : MonoBehaviour
         if (currentPreviewFruit != null && canDrop)
         {
             TrackMousePosition();
-            DrawTrajectoryLine(); // Vẽ đường kẻ mỗi frame
+            DrawTrajectoryLine();
 
             if (Input.GetMouseButtonDown(0))
             {
@@ -53,40 +60,60 @@ public class FruitSpawner : MonoBehaviour
         Vector3 startPos = currentPreviewFruit.transform.position;
         trajectoryLine.SetPosition(0, startPos);
 
-        // Bắn tia Raycast thẳng xuống để tìm điểm chạm
         RaycastHit hit;
         if (Physics.Raycast(startPos, Vector3.down, out hit, 20f))
         {
-            trajectoryLine.SetPosition(1, hit.point); // Dừng lại ở điểm chạm
+            trajectoryLine.SetPosition(1, hit.point);
         }
         else
         {
-            trajectoryLine.SetPosition(1, startPos + Vector3.down * 10f); // Dừng ở đáy (dự phòng)
+            trajectoryLine.SetPosition(1, startPos + Vector3.down * 10f);
         }
     }
 
-    void SpawnPreviewFruit()
+    // HÀM 1: RANDOM QUẢ MỚI VÀ GỬI LÊN UI
+    void PrepareNextFruit()
     {
+        // Dùng logic mở khóa level xịn xò của bạn
         int maxAllowedLevel = Mathf.Min(GameManager.instance.highestUnlockedLevel, GameManager.instance.maxSpawnableLevelLimit);
         int randomIndex = Random.Range(0, maxAllowedLevel);
 
-        currentPreviewFruit = Instantiate(allFruitPrefabs[randomIndex], transform.position, Quaternion.identity);
+        // Lưu quả vừa random lại vào biến nextFruitPrefab
+        nextFruitPrefab = allFruitPrefabs[randomIndex];
+
+        // Cập nhật hình ảnh lên UI
+        Fruit fruitScript = nextFruitPrefab.GetComponent<Fruit>();
+        if (fruitScript != null && fruitScript.fruitIcon != null && UIManager.instance != null)
+        {
+            UIManager.instance.UpdateNextFruit(fruitScript.fruitIcon);
+        }
+    }
+
+    // HÀM 2: LẤY QUẢ TỪ UI ĐẶT LÊN TAY
+    void SpawnPreviewFruit()
+    {
+        // Sinh ra ĐÚNG CÁI QUẢ đang nằm chờ ở nextFruitPrefab
+        currentPreviewFruit = Instantiate(nextFruitPrefab, transform.position, Quaternion.identity);
 
         Rigidbody rb = currentPreviewFruit.GetComponent<Rigidbody>();
         Collider col = currentPreviewFruit.GetComponent<Collider>();
 
         if (rb != null) rb.isKinematic = true;
-        if (col != null) col.enabled = false;  // Tắt va chạm để tia Raycast ngắm bắn xuyên qua quả lơ lửng được
+        if (col != null) col.enabled = false;
+
+        // Vừa bốc quả từ ô NEXT lên tay xong, thì phải lập tức random quả mới bù vào ô NEXT
+        PrepareNextFruit();
     }
 
     IEnumerator DropFruitRoutine()
     {
         canDrop = false;
-        trajectoryLine.enabled = false; // Ẩn đường kẻ khi đang thả
+        trajectoryLine.enabled = false;
 
         Rigidbody rb = currentPreviewFruit.GetComponent<Rigidbody>();
         Collider col = currentPreviewFruit.GetComponent<Collider>();
 
+        // Thả quả rơi xuống
         if (rb != null) rb.isKinematic = false;
         if (col != null) col.enabled = true;
 
@@ -94,6 +121,7 @@ public class FruitSpawner : MonoBehaviour
 
         yield return new WaitForSeconds(spawnDelay);
 
+        // Hết thời gian delay, tự động lấy quả từ ô NEXT đặt lên tay tiếp
         SpawnPreviewFruit();
         canDrop = true;
     }
