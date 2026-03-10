@@ -15,6 +15,10 @@ public class GameOver : MonoBehaviour
     private Material warningMaterial;
     private float deathY;
 
+    [Header("Game Over FX")]
+    public AudioClip gameOverSound; // Kéo file âm thanh thua cuộc vào đây
+    private AudioSource audioSource;
+
     // Danh sách theo dõi các quả chạm vạch (Tối ưu hơn rất nhiều so với FindGameObjectsWithTag)
     private List<Collider> fruitsInZone = new List<Collider>();
 
@@ -25,6 +29,12 @@ public class GameOver : MonoBehaviour
         {
             warningMaterial = meshRenderer.material;
             meshRenderer.enabled = false; // Tàng hình khi mới vào
+        }
+
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
         }
     }
 
@@ -145,6 +155,33 @@ public class GameOver : MonoBehaviour
         if (UIManager.instance != null && ScoreManager.instance != null)
         {
             UIManager.instance.ShowGameOverPanel(ScoreManager.instance.currentScore);
+
+            if (gameOverSound != null && audioSource != null)
+            {
+                audioSource.PlayOneShot(gameOverSound);
+            }
+
+            // 2. Kích hoạt rung màn hình (rung trong 0.5 giây, biên độ 0.2)
+            StartCoroutine(CameraShake(0.5f, 0.2f));
         }
+    }
+
+    private System.Collections.IEnumerator CameraShake(float duration, float magnitude)
+    {
+        Vector3 originalPos = Camera.main.transform.localPosition;
+        float elapsed = 0.0f;
+
+        while (elapsed < duration)
+        {
+            float x = Random.Range(-1f, 1f) * magnitude;
+            float y = Random.Range(-1f, 1f) * magnitude;
+
+            Camera.main.transform.localPosition = new Vector3(originalPos.x + x, originalPos.y + y, originalPos.z);
+            elapsed += Time.deltaTime;
+
+            yield return null;
+        }
+
+        Camera.main.transform.localPosition = originalPos; // Trả camera về chỗ cũ
     }
 }

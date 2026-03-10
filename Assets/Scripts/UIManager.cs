@@ -4,44 +4,48 @@ using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
 {
-    private Label mainMenuHighScoreLabel;
     public static UIManager instance;
 
+    // Biến tĩnh cực kỳ quan trọng: Để các script khác (ScoreManager, Fruit) có thể xin phép trước khi phát tiếng
+    public static bool isSoundOn = true;
+
     [Header("UI Audio")]
-    public AudioClip clickSound; // Kéo file âm thanh tiếng "Click" vào đây
+    public AudioClip clickSound;
     private AudioSource uiAudioSource;
 
-    private VisualElement hudMain; // Khung HUD chứa điểm và Next fruit
+    [Header("Audio Settings")]
+    public AudioSource bgmSource;
+    private bool isMusicOn = true;
+
+    // --- CÁC BIẾN UI ---
+    private VisualElement hudMain;
     private Label currentScoreLabel;
     private VisualElement nextFruitIcon;
-
-    // Game Over UI
     private VisualElement gameOverScreen;
     private Label finalScoreLabel;
     private Label finalHighScoreLabel;
     private Button restartBtn;
-
-    // Settings UI
     private Button settingsBtn;
     private VisualElement settingsScreen;
     private Button resumeBtn;
-    private Button settingsRestartBtn; // Nút Restart mới trong Settings
+    private Button settingsRestartBtn;
     private Button soundBtn;
+    private Button musicBtn;
     private Button quitBtn;
-
-    // Main Menu UI
     private VisualElement mainMenuScreen;
     private Button startGameBtn;
     private Button mainQuitBtn;
-
-    private bool isSoundOn = true;
+    private VisualElement creditsScreen;
+    private Button creditsBtn;
+    private Button closeCreditsBtn;
+    private Label mainMenuHighScoreLabel;
 
     void Awake()
     {
         if (instance == null) instance = this;
         else Destroy(gameObject);
 
-        // Tự động tạo một cái loa (AudioSource) để phát tiếng Click UI
+        // Khởi tạo nguồn phát tiếng UI
         uiAudioSource = gameObject.AddComponent<AudioSource>();
         uiAudioSource.playOnAwake = false;
     }
@@ -51,15 +55,14 @@ public class UIManager : MonoBehaviour
         UIDocument uiDoc = GetComponent<UIDocument>();
         VisualElement root = uiDoc.rootVisualElement;
 
-        // TÌM HUD CHÍNH
+        // 1. TÌM TẤT CẢ THÀNH PHẦN GIAO DIỆN
         hudMain = root.Q<VisualElement>("hud-main");
         currentScoreLabel = root.Q<Label>("current-score-label");
         nextFruitIcon = root.Q<VisualElement>("next-fruit-icon");
 
         Label hudHighScoreLabel = root.Q<Label>("high-score-label");
-        if (hudHighScoreLabel != null) hudHighScoreLabel.text = "BEST: " + PlayerPrefs.GetInt("HighScore", 0).ToString();
+        if (hudHighScoreLabel != null) hudHighScoreLabel.text = "BEST: " + PlayerPrefs.GetInt("HighScore", 0);
 
-        // TÌM CÁC THÀNH PHẦN KHÁC
         gameOverScreen = root.Q<VisualElement>("game-over-screen");
         finalScoreLabel = root.Q<Label>("final-score-label");
         finalHighScoreLabel = root.Q<Label>("final-high-score-label");
@@ -68,33 +71,49 @@ public class UIManager : MonoBehaviour
         settingsBtn = root.Q<Button>("settings-btn");
         settingsScreen = root.Q<VisualElement>("settings-screen");
         resumeBtn = root.Q<Button>("resume-btn");
-        settingsRestartBtn = root.Q<Button>("settings-restart-btn"); // Tìm nút Restart mới
+        settingsRestartBtn = root.Q<Button>("settings-restart-btn");
         soundBtn = root.Q<Button>("sound-btn");
+        musicBtn = root.Q<Button>("music-btn");
         quitBtn = root.Q<Button>("quit-btn");
 
         mainMenuScreen = root.Q<VisualElement>("main-menu-screen");
         startGameBtn = root.Q<Button>("start-game-btn");
         mainQuitBtn = root.Q<Button>("main-quit-btn");
 
-        mainMenuHighScoreLabel = root.Q<Label>("main-menu-highscore");
+        creditsScreen = root.Q<VisualElement>("credits-screen");
+        creditsBtn = root.Q<Button>("credits-btn");
+        closeCreditsBtn = root.Q<Button>("close-credits-btn");
 
-        // Cập nhật điểm kỷ lục ra ngoài Main Menu
+        mainMenuHighScoreLabel = root.Q<Label>("main-menu-highscore");
         if (mainMenuHighScoreLabel != null)
         {
-            mainMenuHighScoreLabel.text = "BEST: " + PlayerPrefs.GetInt("HighScore", 0).ToString();
+            mainMenuHighScoreLabel.text = "BEST: " + PlayerPrefs.GetInt("HighScore", 0);
         }
 
-        // GẮN SỰ KIỆN CLICK (Thêm PlayClickSound vào mỗi hành động)
+        // 2. GẮN SỰ KIỆN NÚT BẤM (Gắn 1 lần duy nhất)
         if (restartBtn != null) restartBtn.clicked += RestartGame;
         if (settingsBtn != null) settingsBtn.clicked += OpenSettings;
         if (resumeBtn != null) resumeBtn.clicked += CloseSettings;
-        if (settingsRestartBtn != null) settingsRestartBtn.clicked += RestartGame; // Nút Restart trong setting cũng gọi hàm RestartGame
+        if (settingsRestartBtn != null) settingsRestartBtn.clicked += RestartGame;
         if (soundBtn != null) soundBtn.clicked += ToggleSound;
+        if (musicBtn != null) musicBtn.clicked += ToggleMusic;
         if (quitBtn != null) quitBtn.clicked += QuitGame;
         if (startGameBtn != null) startGameBtn.clicked += StartGameFromMenu;
         if (mainQuitBtn != null) mainQuitBtn.clicked += QuitGame;
+        if (creditsBtn != null) creditsBtn.clicked += ShowCredits;
+        if (closeCreditsBtn != null) closeCreditsBtn.clicked += CloseCredits;
+    }
 
-        // VỪA VÀO GAME: Ẩn HUD, hiện Main Menu, Tắt máy thả quả
+    void Start()
+    {
+        // 3. LOAD CÀI ĐẶT ÂM THANH TỪ BỘ NHỚ
+        isSoundOn = PlayerPrefs.GetInt("SoundOn", 1) == 1;
+        isMusicOn = PlayerPrefs.GetInt("MusicOn", 1) == 1;
+
+        UpdateSoundState();
+        UpdateMusicState();
+
+        // 4. THIẾT LẬP BAN ĐẦU
         if (hudMain != null) hudMain.AddToClassList("hidden");
 
         FruitSpawner spawner = FindFirstObjectByType<FruitSpawner>();
@@ -103,15 +122,21 @@ public class UIManager : MonoBehaviour
         UpdateScore(0);
     }
 
-    // --- HÀM PHÁT ÂM THANH CLICK ---
-    private void PlayClickSound()
+    void Update()
     {
-        if (clickSound != null && uiAudioSource != null && isSoundOn)
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
-            uiAudioSource.PlayOneShot(clickSound);
+            if (mainMenuScreen != null && !mainMenuScreen.ClassListContains("hidden")) return;
+
+            if (settingsScreen != null)
+            {
+                if (settingsScreen.ClassListContains("hidden")) OpenSettings();
+                else CloseSettings();
+            }
         }
     }
 
+    // --- LOGIC GIAO DIỆN CHUNG ---
     public void UpdateScore(int newScore)
     {
         if (currentScoreLabel != null) currentScoreLabel.text = newScore.ToString();
@@ -123,23 +148,6 @@ public class UIManager : MonoBehaviour
         {
             nextFruitIcon.style.backgroundImage = new StyleBackground(fruitSprite);
             nextFruitIcon.style.backgroundColor = new StyleColor(Color.clear);
-        }
-    }
-
-    void Update()
-    {
-        // Lắng nghe phím ESC trên bàn phím
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            // Nếu đang ở Main Menu thì không cho bật Setting bằng ESC
-            if (mainMenuScreen != null && !mainMenuScreen.ClassListContains("hidden")) return;
-
-            // Nếu bảng Setting đang đóng thì mở ra, đang mở thì đóng lại
-            if (settingsScreen != null)
-            {
-                if (settingsScreen.ClassListContains("hidden")) OpenSettings();
-                else CloseSettings();
-            }
         }
     }
 
@@ -161,11 +169,59 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    // --- LOGIC ÂM THANH (ĐÃ FIX LỖI TÁCH BIỆT) ---
+    private void PlayClickSound()
+    {
+        // Phải kiểm tra isSoundOn trước khi kêu
+        if (clickSound != null && uiAudioSource != null && isSoundOn)
+        {
+            uiAudioSource.PlayOneShot(clickSound);
+        }
+    }
+
+    private void ToggleSound()
+    {
+        isSoundOn = !isSoundOn;
+        PlayerPrefs.SetInt("SoundOn", isSoundOn ? 1 : 0);
+        PlayerPrefs.Save();
+        UpdateSoundState();
+        PlayClickSound(); // Bật lên thì kêu cái click cho vui tai
+    }
+
+    private void UpdateSoundState()
+    {
+        // KHÔNG CÒN LỆNH AudioListener.pause Ở ĐÂY NỮA
+        if (soundBtn != null)
+        {
+            soundBtn.text = isSoundOn ? "SOUND: ON" : "SOUND: OFF";
+        }
+    }
+
+    private void ToggleMusic()
+    {
+        isMusicOn = !isMusicOn;
+        PlayerPrefs.SetInt("MusicOn", isMusicOn ? 1 : 0);
+        PlayerPrefs.Save();
+        UpdateMusicState();
+        PlayClickSound();
+    }
+
+    private void UpdateMusicState()
+    {
+        if (bgmSource != null)
+        {
+            bgmSource.mute = !isMusicOn;
+        }
+        if (musicBtn != null)
+        {
+            musicBtn.text = isMusicOn ? "MUSIC: ON" : "MUSIC: OFF";
+        }
+    }
+
+    // --- LOGIC NÚT BẤM CƠ BẢN ---
     private void StartGameFromMenu()
     {
-        PlayClickSound(); // Kêu tiếng Click
-
-        // Bật HUD lên, Ẩn Main Menu đi
+        PlayClickSound();
         if (hudMain != null) hudMain.RemoveFromClassList("hidden");
         if (mainMenuScreen != null) mainMenuScreen.AddToClassList("hidden");
 
@@ -200,22 +256,23 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    private void ToggleSound()
-    {
-        PlayClickSound();
-        isSoundOn = !isSoundOn;
-        AudioListener.pause = !isSoundOn;
-
-        if (soundBtn != null)
-        {
-            soundBtn.text = isSoundOn ? "SOUND: ON" : "SOUND: OFF";
-        }
-    }
-
     private void QuitGame()
     {
         PlayClickSound();
-        Debug.Log("Đang thoát game...");
         Application.Quit();
+    }
+
+    private void ShowCredits()
+    {
+        PlayClickSound();
+        mainMenuScreen.AddToClassList("hidden");
+        if (creditsScreen != null) creditsScreen.RemoveFromClassList("hidden");
+    }
+
+    private void CloseCredits()
+    {
+        PlayClickSound();
+        if (creditsScreen != null) creditsScreen.AddToClassList("hidden");
+        mainMenuScreen.RemoveFromClassList("hidden");
     }
 }

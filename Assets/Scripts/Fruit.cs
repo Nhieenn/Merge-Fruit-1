@@ -26,9 +26,8 @@ public class Fruit : MonoBehaviour
     void OnCollisionEnter(Collision collision)
     {
         // 1. XỬ LÝ ÂM THANH VA CHẠM (RƠI / ĐẬP VÀO NHAU)
-        // Chỉ phát tiếng nếu lực va chạm đủ mạnh (> 1f) để tránh ồn ào khi quả lăn nhẹ
-        // Thêm điều kiện audioSource.isActiveAndEnabled vào để check xem loa có đang bật không
-        if (audioSource != null && audioSource.isActiveAndEnabled && dropSound != null && collision.relativeVelocity.magnitude > 1f)
+        // ĐÃ THÊM: Kiểm tra UIManager.isSoundOn trước khi cho phép phát tiếng!
+        if (UIManager.isSoundOn && audioSource != null && audioSource.isActiveAndEnabled && dropSound != null && collision.relativeVelocity.magnitude > 1f)
         {
             float volume = Mathf.Clamp01(collision.relativeVelocity.magnitude / 5f) * 0.5f;
             audioSource.PlayOneShot(dropSound, volume);
@@ -47,7 +46,16 @@ public class Fruit : MonoBehaviour
             // Đưa hiệu ứng nổ ra ngoài để dù là gộp quả nhỏ hay quả to nhất thì vẫn nổ bùm
             if (mergeEffectPrefab != null)
             {
-                Instantiate(mergeEffectPrefab, transform.position, Quaternion.identity);
+                // Bắt lấy cái hiệu ứng vừa được sinh ra gán vào biến 'effect'
+                GameObject effect = Instantiate(mergeEffectPrefab, transform.position, Quaternion.identity);
+
+                // TÌM VÀ KIỂM SOÁT CÁI LOA TRÊN HIỆU ỨNG ĐÓ
+                AudioSource effectAudio = effect.GetComponent<AudioSource>();
+                if (effectAudio != null)
+                {
+                    // Nếu tắt Sound thì mute cái loa này đi
+                    effectAudio.mute = !UIManager.isSoundOn;
+                }
             }
 
             // Kiểm tra xem có quả cấp tiếp theo không
@@ -59,22 +67,23 @@ public class Fruit : MonoBehaviour
                 int nextLevel = fruitLevel + 1;
                 GameManager.instance.CheckAndUnlockLevel(nextLevel);
 
-              
-                // Lưu quả vừa tạo ra vào biến newFruit
                 GameObject newFruit = Instantiate(nextLevelPrefab, transform.position, Quaternion.identity);
 
                 // Gán isDropped cho quả mới tạo ra, tha cho cái Prefab gốc!
                 newFruit.GetComponent<Fruit>().isDropped = true;
+
+                // KIỂM SOÁT LOA CỦA QUẢ MỚI
+                AudioSource newFruitAudio = newFruit.GetComponent<AudioSource>();
+                if (newFruitAudio != null)
+                {
+                    newFruitAudio.mute = !UIManager.isSoundOn;
+                }
             }
             else
             {
                 // TÌNH HUỐNG ĐẶC BIỆT: GỘP 2 QUẢ TO NHẤT (Level 11)
-                // nextLevelPrefab đang bị bỏ trống (null)
-                // Cộng một lượng điểm khổng lồ để thưởng cho người chơi!
                 ScoreManager.instance.AddScore(1000);
                 Debug.Log("Đã nổ 2 quả to nhất! Thưởng 1000 điểm!");
-
-                // (Sau này bạn có thể tạo 1 prefab hiệu ứng nổ siêu to khổng lồ gắn vào đây)
             }
 
             // Dọn dẹp cả 2 quả

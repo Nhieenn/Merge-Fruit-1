@@ -39,6 +39,7 @@
             <ui:Label text="PAUSED" class="game-over-title" style="color: white;" />
             <ui:Button text="RESUME" name="resume-btn" class="action-btn" style="margin-bottom: 15px;" />
             <ui:Button text="RESTART" name="settings-restart-btn" class="action-btn" style="margin-bottom: 15px;" />
+            <ui:Button text="MUSIC: ON" name="music-btn" class="action-btn" style="margin-bottom: 15px;" />
             <ui:Button text="SOUND: ON" name="sound-btn" class="action-btn" style="margin-bottom: 15px;" />
             <ui:Button text="QUIT" name="quit-btn" class="action-btn" />
         </ui:VisualElement>
@@ -49,8 +50,18 @@
         
         <ui:Label text="BEST: 0" name="main-menu-highscore" class="minimal-text" style="font-size: 30px; margin-bottom: 50px; color: rgb(255, 215, 0);" />
         
-        <ui:Button text="PLAY" name="start-game-btn" class="action-btn" style="font-size: 40px; padding: 20px 80px; margin-bottom: 20px;" />
+       <ui:Button text="PLAY" name="start-game-btn" class="action-btn" style="font-size: 40px; padding: 20px 80px; margin-bottom: 20px;" />
+       <ui:Button text="CREDITS" name="credits-btn" class="action-btn" style="margin-bottom: 20px;" />
         <ui:Button text="QUIT" name="main-quit-btn" class="action-btn" />
     </ui:VisualElement>
 
+    <ui:VisualElement name="credits-screen" class="game-over-overlay hidden">
+        <ui:VisualElement class="glass-panel game-over-box" style="width: 450px;">
+            <ui:Label text="CREDITS" class="game-over-title" style="color: white;" />
+            
+            <ui:Label text="Game này được làm bởi Nhiên với sự giúp đỡ của Gemini MUAHHEHEHEHEHEHHEHEHEEHEHEH!!!" class="minimal-text" style="white-space: normal; -unity-text-align: middle-center; margin-bottom: 30px; font-size: 22px;" />
+            
+            <ui:Button text="BACK" name="close-credits-btn" class="action-btn" />
+        </ui:VisualElement>
+    </ui:VisualElement>
 </ui:UXML>

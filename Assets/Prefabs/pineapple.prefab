@@ -165,6 +165,7 @@ MonoBehaviour:
   mergeEffectPrefab: {fileID: 4165127031635467946, guid: b1e1f825cbe178541b4c0d5a1ce3fb21, type: 3}
   dropSound: {fileID: 8300000, guid: 01936599b1cbf4847a4c72b214889dc4, type: 3}
   fruitIcon: {fileID: 21300000, guid: 8787e92c6dad98b488af8734d09ec6e3, type: 3}
+  isDropped: 0
 --- !u!82 &6809351223807189899
 AudioSource:
   m_ObjectHideFlags: 0

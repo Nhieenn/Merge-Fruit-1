@@ -115,6 +115,7 @@ MonoBehaviour:
   mergeEffectPrefab: {fileID: 4165127031635467946, guid: b1e1f825cbe178541b4c0d5a1ce3fb21, type: 3}
   dropSound: {fileID: 8300000, guid: 01936599b1cbf4847a4c72b214889dc4, type: 3}
   fruitIcon: {fileID: 21300000, guid: 7f98b5e241e5f3345966a0780a12c270, type: 3}
+  isDropped: 0
 --- !u!54 &5215230715188683702
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -161,8 +162,8 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.020377276
-  m_Center: {x: -0.00008494686, y: 0.02080143, z: -0.00009237137}
+  m_Radius: 0.016190436
+  m_Center: {x: -0.00008494593, y: 0.01661459, z: -0.000092370436}
 --- !u!82 &2423440386814737240
 AudioSource:
   m_ObjectHideFlags: 0

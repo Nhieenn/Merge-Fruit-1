@@ -14,6 +14,10 @@ public class FruitSpawner : MonoBehaviour
     private GameObject currentPreviewFruit;
     private bool canDrop = true;
 
+    [Header("Spawn Boundaries")]
+    public float minX = -0.527f; // Giới hạn tường bên trái
+    public float maxX = 0.507f;  // Giới hạn tường bên phải
+
     // Biến này sẽ lưu trữ quả đang hiển thị trên ô NEXT của UI
     private GameObject nextFruitPrefab;
 
@@ -49,7 +53,9 @@ public class FruitSpawner : MonoBehaviour
         inputPosition.z = Mathf.Abs(Camera.main.transform.position.z - transform.position.z);
         Vector3 worldPosition = Camera.main.ScreenToWorldPoint(inputPosition);
 
-        float clampedX = Mathf.Clamp(worldPosition.x, -spawnLimitX, spawnLimitX);
+        // Thay vì dùng -spawnLimitX và spawnLimitX, ta ép vào đúng 2 tọa độ bạn vừa đo được
+        float clampedX = Mathf.Clamp(worldPosition.x, minX, maxX);
+
         currentPreviewFruit.transform.position = new Vector3(clampedX, transform.position.y, transform.position.z);
     }
 
