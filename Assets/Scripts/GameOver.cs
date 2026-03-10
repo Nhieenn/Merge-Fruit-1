@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 public class GameOver : MonoBehaviour
 {
@@ -66,8 +67,10 @@ public class GameOver : MonoBehaviour
 
         foreach (var f in fruits)
         {
-            Rigidbody rb = f.GetComponent<Rigidbody>();
-            if (rb != null && rb.isKinematic) continue;
+            Fruit fruitScript = f.GetComponent<Fruit>();
+
+            // Chỉ xét những quả đã rớt
+            if (fruitScript == null || !fruitScript.isDropped) continue;
 
             if (f.transform.position.y > highestFruitY)
             {
@@ -79,19 +82,25 @@ public class GameOver : MonoBehaviour
         {
             float distance = deathY - highestFruitY;
 
+            // Nếu khoảng cách an toàn (lớn hơn 0 và nhỏ hơn vùng cảnh báo mới)
             if (distance > 0 && distance <= warningDistance)
             {
-                // Hiệu ứng nhấp nháy mượt mà của bạn
                 float alpha = Mathf.PingPong(Time.time * 2f, 0.4f) + 0.1f;
                 SetWarningVisual(alpha);
             }
             else
             {
+                // Tắt cảnh báo khi trái cây còn ở xa
                 if (meshRenderer != null) meshRenderer.enabled = false;
             }
         }
+        else
+        {
+            // --- KHÓA AN TOÀN --- 
+            // Nếu không tìm thấy quả nào (mới vào game), thì tắt luôn vạch!
+            if (meshRenderer != null) meshRenderer.enabled = false;
+        }
     }
-
     // --- HỆ THỐNG CẢM BIẾN VẬT LÝ ---
     void OnTriggerEnter(Collider other)
     {

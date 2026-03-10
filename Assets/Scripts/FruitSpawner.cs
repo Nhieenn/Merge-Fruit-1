@@ -37,6 +37,7 @@ public class FruitSpawner : MonoBehaviour
 
             if (Input.GetMouseButtonDown(0))
             {
+                currentPreviewFruit.GetComponent<Fruit>().isDropped = true;
                 StartCoroutine(DropFruitRoutine());
             }
         }

@@ -16,6 +16,7 @@ public class Fruit : MonoBehaviour
     [Header("UI Element")]
     public Sprite fruitIcon; // Ảnh 2D để hiển thị lên bảng Next Fruit
 
+    public bool isDropped = false;
     void Awake()
     {
         // Tự động lấy component AudioSource khi quả xuất hiện
@@ -58,7 +59,12 @@ public class Fruit : MonoBehaviour
                 int nextLevel = fruitLevel + 1;
                 GameManager.instance.CheckAndUnlockLevel(nextLevel);
 
-                Instantiate(nextLevelPrefab, transform.position, Quaternion.identity);
+              
+                // Lưu quả vừa tạo ra vào biến newFruit
+                GameObject newFruit = Instantiate(nextLevelPrefab, transform.position, Quaternion.identity);
+
+                // Gán isDropped cho quả mới tạo ra, tha cho cái Prefab gốc!
+                newFruit.GetComponent<Fruit>().isDropped = true;
             }
             else
             {

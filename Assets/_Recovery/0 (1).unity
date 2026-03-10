@@ -644,7 +644,7 @@ Transform:
   m_GameObject: {fileID: 613856648}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.036, y: 0.119, z: 0.504}
+  m_LocalPosition: {x: -0.036, y: 0.1, z: 0.504}
   m_LocalScale: {x: 0.18895294, y: 0.01, z: 1.0157937}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -696,7 +696,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 4cdbddff6880005488bc76901c4c9fcd, type: 2}
+  - {fileID: 2100000, guid: ca3f21b552861664abb412128a6df436, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -741,7 +741,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameOver
   timeToLose: 3
-  warningDistance: 0.04
+  warningDistance: 1.5
 --- !u!1 &628698147
 GameObject:
   m_ObjectHideFlags: 0
