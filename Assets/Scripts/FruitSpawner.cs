@@ -15,25 +15,32 @@ public class FruitSpawner : MonoBehaviour
     private bool canDrop = true;
 
     [Header("Spawn Boundaries")]
-    public float minX = -0.527f; // Giới hạn tường bên trái
-    public float maxX = 0.507f;  // Giới hạn tường bên phải
+    public float minX = -0.527f;
+    public float maxX = 0.507f;
 
-    // Biến này sẽ lưu trữ quả đang hiển thị trên ô NEXT của UI
     private GameObject nextFruitPrefab;
 
     void Start()
     {
         if (trajectoryLine != null) trajectoryLine.positionCount = 2;
 
-        // 1. Vừa vào game, random ngay quả đầu tiên để hiện lên UI
-        PrepareNextFruit();
+        // ÉP CHỜ 1 NHỊP ĐỂ ĐẢM BẢO GAMEMANAGER VÀ UIMANAGER ĐÃ SẴN SÀNG
+        StartCoroutine(SafeStart());
+    }
 
-        // 2. Lấy luôn quả vừa random đó đặt lên tay người chơi
+    IEnumerator SafeStart()
+    {
+        // Chờ đến khi GameManager và UIManager không còn null nữa
+        while (GameManager.instance == null) yield return null;
+
+        PrepareNextFruit();
+        yield return new WaitForSeconds(0.1f); // Chờ thêm một tẹo cho chắc
         SpawnPreviewFruit();
     }
 
     void Update()
     {
+        // Phải có quả trên tay VÀ quả đó không bị null mới chạy logic
         if (currentPreviewFruit != null && canDrop)
         {
             TrackMousePosition();
@@ -41,7 +48,10 @@ public class FruitSpawner : MonoBehaviour
 
             if (Input.GetMouseButtonDown(0))
             {
-                currentPreviewFruit.GetComponent<Fruit>().isDropped = true;
+                // Kiểm tra component Fruit trước khi truy cập
+                Fruit fScript = currentPreviewFruit.GetComponent<Fruit>();
+                if (fScript != null) fScript.isDropped = true;
+
                 StartCoroutine(DropFruitRoutine());
             }
         }
@@ -49,19 +59,19 @@ public class FruitSpawner : MonoBehaviour
 
     void TrackMousePosition()
     {
+        if (currentPreviewFruit == null) return;
+
         Vector3 inputPosition = Input.mousePosition;
         inputPosition.z = Mathf.Abs(Camera.main.transform.position.z - transform.position.z);
         Vector3 worldPosition = Camera.main.ScreenToWorldPoint(inputPosition);
 
-        // Thay vì dùng -spawnLimitX và spawnLimitX, ta ép vào đúng 2 tọa độ bạn vừa đo được
         float clampedX = Mathf.Clamp(worldPosition.x, minX, maxX);
-
         currentPreviewFruit.transform.position = new Vector3(clampedX, transform.position.y, transform.position.z);
     }
 
     void DrawTrajectoryLine()
     {
-        if (trajectoryLine == null) return;
+        if (trajectoryLine == null || currentPreviewFruit == null) return;
 
         trajectoryLine.enabled = true;
         Vector3 startPos = currentPreviewFruit.transform.position;
@@ -78,28 +88,37 @@ public class FruitSpawner : MonoBehaviour
         }
     }
 
-    // HÀM 1: RANDOM QUẢ MỚI VÀ GỬI LÊN UI
     void PrepareNextFruit()
     {
-        // Dùng logic mở khóa level xịn xò của bạn
-        int maxAllowedLevel = Mathf.Min(GameManager.instance.highestUnlockedLevel, GameManager.instance.maxSpawnableLevelLimit);
-        int randomIndex = Random.Range(0, maxAllowedLevel);
+        if (allFruitPrefabs == null || allFruitPrefabs.Length == 0) return;
 
-        // Lưu quả vừa random lại vào biến nextFruitPrefab
+        // Kiểm tra an toàn cho GameManager
+        int maxAllowed = 3; // Mặc định nếu GameManager lỗi
+        if (GameManager.instance != null)
+        {
+            maxAllowed = Mathf.Min(GameManager.instance.highestUnlockedLevel, GameManager.instance.maxSpawnableLevelLimit);
+        }
+
+        // Đảm bảo randomIndex không vượt quá độ dài mảng thực tế
+        int randomIndex = Random.Range(0, Mathf.Min(maxAllowed, allFruitPrefabs.Length));
         nextFruitPrefab = allFruitPrefabs[randomIndex];
 
-        // Cập nhật hình ảnh lên UI
-        Fruit fruitScript = nextFruitPrefab.GetComponent<Fruit>();
-        if (fruitScript != null && fruitScript.fruitIcon != null && UIManager.instance != null)
+        if (nextFruitPrefab != null)
         {
-            UIManager.instance.UpdateNextFruit(fruitScript.fruitIcon);
+            Fruit fruitScript = nextFruitPrefab.GetComponent<Fruit>();
+            if (fruitScript != null && fruitScript.fruitIcon != null && UIManager.instance != null)
+            {
+                UIManager.instance.UpdateNextFruit(fruitScript.fruitIcon);
+            }
         }
     }
 
-    // HÀM 2: LẤY QUẢ TỪ UI ĐẶT LÊN TAY
     void SpawnPreviewFruit()
     {
-        // Sinh ra ĐÚNG CÁI QUẢ đang nằm chờ ở nextFruitPrefab
+        // Nếu vì lý do gì đó mà nextFruitPrefab bị trống, chạy Prepare ngay
+        if (nextFruitPrefab == null) PrepareNextFruit();
+        if (nextFruitPrefab == null) return; // Nếu vẫn trống thì chịu, thoát để không crash
+
         currentPreviewFruit = Instantiate(nextFruitPrefab, transform.position, Quaternion.identity);
 
         Rigidbody rb = currentPreviewFruit.GetComponent<Rigidbody>();
@@ -108,19 +127,19 @@ public class FruitSpawner : MonoBehaviour
         if (rb != null) rb.isKinematic = true;
         if (col != null) col.enabled = false;
 
-        // Vừa bốc quả từ ô NEXT lên tay xong, thì phải lập tức random quả mới bù vào ô NEXT
         PrepareNextFruit();
     }
 
     IEnumerator DropFruitRoutine()
     {
+        if (currentPreviewFruit == null) yield break;
+
         canDrop = false;
-        trajectoryLine.enabled = false;
+        if (trajectoryLine != null) trajectoryLine.enabled = false;
 
         Rigidbody rb = currentPreviewFruit.GetComponent<Rigidbody>();
         Collider col = currentPreviewFruit.GetComponent<Collider>();
 
-        // Thả quả rơi xuống
         if (rb != null) rb.isKinematic = false;
         if (col != null) col.enabled = true;
 
@@ -128,7 +147,6 @@ public class FruitSpawner : MonoBehaviour
 
         yield return new WaitForSeconds(spawnDelay);
 
-        // Hết thời gian delay, tự động lấy quả từ ô NEXT đặt lên tay tiếp
         SpawnPreviewFruit();
         canDrop = true;
     }
